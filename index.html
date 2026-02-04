@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小雞英文冒險 - 英語力測驗版</title>
+    <title>小雞英文冒險 - 3D 雙語大師版</title>
+    <!-- 引入 Three.js 引擎 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --scene-bg: #e8f5e9;
             --scene-accent: #81c784;
-            --chick-yellow: #ffec85;
-            --chick-orange: #ff9d42;
             --text-color: #333;
             --gold: #ffd700;
         }
@@ -18,76 +18,66 @@
         body.medium { --scene-bg: #fff3e0; --scene-accent: #e65100; }
         body.hard { --scene-bg: #37474f; --scene-accent: #ff5252; --text-color: #fff; }
 
-        * { box-sizing: border-box; transition: all 0.4s ease; }
+        * { box-sizing: border-box; transition: background-color 0.8s ease; }
 
         body {
             background-color: var(--scene-bg);
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; margin: 0; color: var(--text-color); overflow-x: hidden; position: relative;
+            min-height: 100vh; margin: 0; color: var(--text-color); overflow: hidden; position: relative;
+            /* 背景圖層級預設 */
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
         }
 
-        #bg-elements { position: absolute; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        .floating { position: absolute; animation: float 6s infinite ease-in-out; opacity: 0.2; font-size: 2rem; }
-        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(15deg); } }
+        /* 背景圖樣式切換 (若已上傳圖片可取消註解) */
+        /* body.easy { background-image: url('bg_easy.jpg'); }
+        body.medium { background-image: url('bg_medium.jpg'); }
+        body.hard { background-image: url('bg_hard.jpg'); }
+        */
 
         #top-info {
             position: fixed; top: 20px; width: 90%; max-width: 500px;
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(255,255,255,0.9); padding: 12px 25px; border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 10; color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; color: #333;
         }
 
-        #character-container { text-align: center; margin-bottom: 20px; z-index: 5; position: relative; }
-        .chick {
-            width: 100px; height: 100px; background-color: var(--chick-yellow);
-            border-radius: 50% 50% 45% 45%; position: relative; border: 4px solid #fff;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin: 0 auto;
+        /* 3D 畫布容器 */
+        #canvas-container {
+            width: 250px; height: 250px;
+            margin-bottom: 10px; z-index: 5;
+            cursor: pointer;
         }
-        .eye { position: absolute; top: 40%; width: 8px; height: 8px; background: #333; border-radius: 50%; }
-        .eye.left { left: 30%; }
-        .eye.right { right: 30%; }
-        .beak { position: absolute; top: 55%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid var(--chick-orange); }
-        
-        #equipment-slots {
-            position: absolute; width: 200px; height: 200px;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            pointer-events: none;
+
+        #chick-speech { 
+            margin-top: 10px; padding: 12px 20px; 
+            background: white; border-radius: 15px; 
+            font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            position: relative; color: #333; max-width: 320px; 
+            text-align: center; font-size: 15px;
         }
-        .eq-item { position: absolute; font-size: 24px; opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0); }
-        .eq-item.active { opacity: 1; transform: scale(1); }
-        /* 10 裝備位置 */
-        .eq-0 { top: 0; left: 0; } .eq-1 { top: -25px; left: 50%; transform: translateX(-50%); } 
-        .eq-2 { top: 0; right: 0; } .eq-3 { left: -25px; top: 50%; transform: translateY(-50%); }
-        .eq-4 { right: -25px; top: 50%; transform: translateY(-50%); } .eq-5 { bottom: 0; left: 0; }
-        .eq-6 { bottom: -25px; left: 50%; transform: translateX(-50%); } .eq-7 { bottom: 0; right: 0; }
-        .eq-8 { top: 20px; left: 20px; } .eq-9 { top: 20px; right: 20px; }
-
-        .happy { animation: jump 0.5s ease; }
-        @keyframes jump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px); } }
-        .shake { animation: shake 0.4s ease; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-
-        #chick-speech { margin-top: 15px; padding: 12px 20px; background: white; border-radius: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; color: #333; max-width: 320px; line-height: 1.4; text-align: center; }
 
         #game-box {
-            background: white; padding: 25px; border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-            text-align: center; width: 95%; max-width: 500px; z-index: 5; color: #333;
+            background: white; padding: 25px; border-radius: 28px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            text-align: center; width: 95%; max-width: 500px; 
+            z-index: 5; color: #333; margin-top: 10px;
         }
 
-        .stage-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; background: #eee; font-size: 12px; margin-bottom: 10px; font-weight: 800; color: var(--scene-accent); }
-        .question { font-size: 17px; margin-bottom: 20px; line-height: 1.6; font-weight: 600; text-align: left; }
-        .en-q { color: #555; font-style: italic; font-size: 15px; display: block; margin-top: 5px; border-left: 3px solid var(--scene-accent); padding-left: 10px; }
+        .stage-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; background: #eee; font-size: 12px; margin-bottom: 8px; font-weight: 800; color: var(--scene-accent); }
+        .question { font-size: 17px; margin-bottom: 15px; line-height: 1.5; font-weight: 600; text-align: left; }
+        .en-q { color: #666; font-style: italic; font-size: 14px; display: block; margin-top: 5px; border-left: 3px solid var(--scene-accent); padding-left: 10px; }
 
-        .options-grid { display: flex; flex-direction: column; gap: 10px; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
 
         button {
-            padding: 15px 20px; border: 2px solid #f0f0f0; background: #fff; border-radius: 15px;
+            padding: 14px 20px; border: 2px solid #eee; background: #fff; border-radius: 12px;
             cursor: pointer; font-size: 18px; font-weight: bold; color: #444; transition: all 0.2s;
             display: flex; align-items: center; justify-content: center;
         }
-        button:hover:not(:disabled) { border-color: var(--scene-accent); transform: scale(1.02); background: #fafafa; }
-        button:active { transform: scale(0.98); }
+        button:hover:not(:disabled) { border-color: var(--scene-accent); transform: scale(1.02); }
         button.correct { background: #81c784 !important; color: white; border-color: #81c784; }
         button.wrong { background: #e57373 !important; color: white; border-color: #e57373; }
 
@@ -101,48 +91,116 @@
 </head>
 <body class="easy">
 
-    <div id="bg-elements"></div>
-
     <div id="top-info">
-        <span id="scene-name">🌲 單字挑戰</span>
+        <span id="scene-name">🌲 容易階段：單字認讀</span>
         <span>得分: <strong id="score-val">0</strong></span>
     </div>
 
-    <div id="character-container">
-        <div id="equipment-slots">
-            <div class="eq-item eq-0">🧭</div><div class="eq-item eq-1">🎒</div><div class="eq-item eq-2">🍼</div>
-            <div class="eq-item eq-3">🧥</div><div class="eq-item eq-4">🛰️</div>
-            <div class="eq-item eq-5">⛑️</div><div class="eq-item eq-6">🦺</div><div class="eq-item eq-7">👢</div>
-            <div class="eq-item eq-8">🕸️</div><div class="eq-item eq-9">🗡️</div>
-        </div>
-        <div class="chick" id="chick-sprite">
-            <div class="eye left"></div>
-            <div class="eye right"></div>
-            <div class="beak"></div>
-        </div>
-        <div id="chick-speech">"準備好了嗎？Ready?"</div>
-    </div>
+    <!-- 3D 小雞渲染位置 -->
+    <div id="canvas-container"></div>
+    
+    <div id="chick-speech">"點擊下方按鈕開始！<br>Click to start!"</div>
 
     <div id="game-box">
-        <div class="stage-badge" id="stage-info">QUIZ START</div>
-        <div class="question" id="question-text">挑戰開始！點擊選項聽發音。<span class="en-q">Test start! Click options to hear pronunciation.</span></div>
+        <div class="stage-badge" id="stage-info">MISSION START</div>
+        <div class="question" id="question-text">準備好參加 30 題雙語生存測驗了嗎？<span class="en-q">Ready for the 30-question bilingual test?</span></div>
         <div class="options-grid" id="options-container">
-            <button onclick="initGame()" style="background: var(--chick-yellow); border:none;">Let's Go! 🚀</button>
+            <button onclick="initGame()" style="background: var(--gold); border:none;">Let's Go! 🚀</button>
         </div>
     </div>
 
     <div id="ceremony">
         <div style="font-size: 80px;">🏆</div>
-        <h1 style="color: var(--gold); font-size: 2rem;">LEGENDARY SURVIVOR</h1>
+        <h1 style="color: var(--gold); font-size: 2rem;">LEGENDARY HERO</h1>
         <p id="ceremony-text" style="padding: 0 40px; line-height: 1.6;"></p>
-        <button onclick="location.reload()" style="background: var(--gold); border:none; padding: 15px 40px; border-radius:50px; font-weight:bold; margin-top:20px; cursor:pointer;">Play Again / 再挑戰一次</button>
+        <button onclick="location.reload()" style="background: var(--gold); border:none; padding: 15px 40px; border-radius:50px; font-weight:bold; margin-top:20px; cursor:pointer;">Play Again / 再次挑戰</button>
     </div>
 
     <div id="progress-bar"></div>
 
     <script>
-        // --- 題庫 (選項全英文) ---
-        
+        // --- 1. Three.js 3D 小雞建構 ---
+        let scene, camera, renderer, chickGroup;
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(250, 250);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // 光源
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 5, 5).normalize();
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+            // 小雞身體
+            chickGroup = new THREE.Group();
+            const bodyGeo = new THREE.SphereGeometry(1, 32, 32);
+            const bodyMat = new THREE.MeshToonMaterial({ color: 0xffec85 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.scale.set(1, 1.1, 1);
+            chickGroup.add(body);
+
+            // 眼睛
+            const eyeGeo = new THREE.SphereGeometry(0.1, 16, 16);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x333333 });
+            const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+            eyeL.position.set(0.35, 0.3, 0.85);
+            const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+            eyeR.position.set(-0.35, 0.3, 0.85);
+            chickGroup.add(eyeL, eyeR);
+
+            // 嘴巴 (圓錐體)
+            const beakGeo = new THREE.ConeGeometry(0.2, 0.4, 16);
+            const beakMat = new THREE.MeshToonMaterial({ color: 0xff9d42 });
+            const beak = new THREE.Mesh(beakGeo, beakMat);
+            beak.position.set(0, 0, 1);
+            beak.rotation.x = Math.PI / 2;
+            chickGroup.add(beak);
+
+            scene.add(chickGroup);
+            camera.position.z = 4;
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (chickGroup) {
+                chickGroup.rotation.y += 0.01;
+            }
+            renderer.render(scene, camera);
+        }
+
+        // 3D 小雞動態反應
+        function chickAction(type) {
+            if (type === 'happy') {
+                chickGroup.position.y = 0;
+                let jumpCount = 0;
+                const jump = setInterval(() => {
+                    chickGroup.position.y = Math.abs(Math.sin(jumpCount)) * 0.8;
+                    chickGroup.rotation.z = Math.sin(jumpCount) * 0.2;
+                    jumpCount += 0.2;
+                    if (jumpCount > Math.PI * 2) {
+                        clearInterval(jump);
+                        chickGroup.position.y = 0;
+                        chickGroup.rotation.z = 0;
+                    }
+                }, 20);
+            } else {
+                let shakeCount = 0;
+                const shake = setInterval(() => {
+                    chickGroup.position.x = Math.sin(shakeCount * 5) * 0.1;
+                    shakeCount += 0.2;
+                    if (shakeCount > 4) {
+                        clearInterval(shake);
+                        chickGroup.position.x = 0;
+                    }
+                }, 20);
+            }
+        }
+
+        // --- 2. 題庫與遊戲邏輯 ---
         const easyData = [
             { q: "森林是一個複雜的「生態系統」。", eq: "The forest is a complex 'Ecosystem'.", a: ["Economy", "Ecosystem", "Biology"], c: 1 },
             { q: "植物透過「光合作用」製造能量。", eq: "Plants produce energy through 'Photosynthesis'.", a: ["Photosynthesis", "Photography", "Physics"], c: 0 },
@@ -157,56 +215,58 @@
         ];
 
         const mediumData = [
-            { q: "求生 333 原則：沒空氣僅能活 3 分鐘。", eq: "333 Rule: 3 minutes without Air.", a: ["Three Minutes", "Thirty Minutes", "Three Hours"], c: 0, r: "羅盤 🧭", e: 0 },
-            { q: "求生 333 原則：失溫防護不足僅能活 3 小時。", eq: "333 Rule: 3 hours without Shelter.", a: ["Three Minutes", "Three Hours", "Three Days"], c: 1, r: "保暖斗篷 🧥", e: 3 },
-            { q: "求生 333 原則：沒飲水僅能活 3 天。", eq: "333 Rule: 3 days without Water.", a: ["Three Hours", "Three Days", "Three Weeks"], c: 1, r: "冒險水壺 🍼", e: 2 },
-            { q: "求生 333 原則：沒食物僅能活 3 週。", eq: "333 Rule: 3 weeks without Food.", a: ["Three Days", "Three Weeks", "Three Months"], c: 1, r: "行動糧 🎒", e: 1 },
-            { q: "「指南針」在迷路時很有用。", eq: "A 'Compass' is useful when lost.", a: ["Compass", "Mirror", "Hammer"], c: 0 },
-            { q: "這是一支「衛星手機」。", eq: "This is a 'Satellite Phone'.", a: ["GPS", "Satellite Phone", "LAN"], c: 1, r: "通訊器 🛰️", e: 4 },
-            { q: "你需要「防水的」外套。", eq: "You need a 'Waterproof' jacket.", a: ["Waterproof", "Waterslide", "Waterfall"], c: 0 },
-            { q: "「通訊」在求生中很關鍵。", eq: "Communication is key in survival.", a: ["Communication", "Energy", "Digital"], c: 0 },
-            { q: "羅盤上的 'W' 代表「西方」。", eq: "'W' on a compass stands for 'West'.", a: ["East", "West", "North"], c: 1 },
-            { q: "帶一些「高能量」的零食。", eq: "Bring some 'High-energy' snacks.", a: ["High-energy", "High-water", "Heavy"], c: 0 }
+            { q: "求生 333 原則：沒空氣僅能活 3 分鐘。", eq: "333 Rule: 3 minutes without Air.", a: ["Three Minutes", "Thirty Minutes", "Three Hours"], c: 0, r: "羅盤 🧭" },
+            { q: "求生 333 原則：失溫防護不足僅能活 3 小時。", eq: "333 Rule: 3 hours without Shelter.", a: ["Three Minutes", "Three Hours", "Three Days"], c: 1, r: "保暖斗篷 🧥" },
+            { q: "求生 333 原則：沒飲水僅能活 3 天。", eq: "333 Rule: 3 days without Water.", a: ["Three Hours", "Three Days", "Three Weeks"], c: 1, r: "冒險水壺 🍼" },
+            { q: "求生 333 原則：沒食物僅能活 3 週。", eq: "333 Rule: 3 weeks without Food.", a: ["Three Days", "Three Weeks", "Three Months"], c: 1, r: "行動糧 🎒" },
+            { q: "「指南針」在迷路時很有用。", eq: "A 'Compass' is useful when lost.", a: ["Compass", "Mirror", "Hammer"], c: 0, r: "裝備箱 📦" },
+            { q: "這是一支「衛星手機」。", eq: "This is a 'Satellite Phone'.", a: ["GPS", "Satellite Phone", "LAN"], c: 1, r: "通訊器 🛰️" },
+            { q: "你需要「防水的」外套。", eq: "You need a 'Waterproof' jacket.", a: ["Waterproof", "Waterslide", "Waterfall"], c: 0, r: "雨衣 🧥" },
+            { q: "「通訊」在求生中很關鍵。", eq: "Communication is key in survival.", a: ["Communication", "Energy", "Digital"], c: 0, r: "信號彈 🚩" },
+            { q: "羅盤上的 'W' 代表「西方」。", eq: "'W' on a compass stands for 'West'.", a: ["East", "West", "North"], c: 1, r: "地圖 🗺️" },
+            { q: "帶一些「高能量」的零食。", eq: "Bring some 'High-energy' snacks.", a: ["High-energy", "High-water", "Heavy"], c: 0, r: "能量棒 🍫" }
         ];
 
         const hardData = [
-            { q: "如果你遇到黑熊，請慢慢後退。", eq: "If you encounter a bear, back away slowly.", a: ["Run away", "Back away slowly", "Play dead"], c: 1, r: "防護頭盔 ⛑️", e: 5 },
-            { q: "在劇烈亂流中，請穿上救生衣。", eq: "In severe turbulence, wear a life jacket.", a: ["Wear life jacket", "Jump", "Stand up"], c: 0, r: "救生衣 🦺", e: 6 },
-            { q: "土石流發生時，往兩側高處逃。", eq: "When a landslide occurs, move sideways.", a: ["Move sideways", "Run down", "Stay still"], c: 0, r: "登山靴 👢", e: 7 },
-            { q: "若被蜜蜂追，躲進封閉的遮蔽處。", eq: "If chased by bees, run to a shelter.", a: ["Jump in water", "Run to shelter", "Swat"], c: 1, r: "防蟲網 🕸️", e: 8 },
-            { q: "被蛇咬傷後，保持傷口低於心臟。", eq: "Keep the wound below the heart after a snake bite.", a: ["Suck venom", "Keep below heart", "Run"], c: 1 },
-            { q: "打雷時，絕對不要躲在大樹下。", eq: "Never hide under a tree during a thunderstorm.", a: ["Low ground", "Under a tree", "Inside car"], c: 1 },
-            { q: "如果你在森林迷路，留在原地待援。", eq: "If lost in the forest, stay where you are.", a: ["Keep walking", "Stay where you are", "Shout"], c: 1 },
-            { q: "遇森林火災，往逆風方向逃生。", eq: "Run upwind to escape a forest fire.", a: ["Downwind", "Upwind", "Up hill"], c: 1 },
-            { q: "溪水變濁代表上游可能有山洪。", eq: "Muddy water means a flash flood is coming.", a: ["Swimming", "Hiking", "Flash flood"], c: 2 },
-            { q: "恭喜！領取你的英雄劍！", eq: "Congrats! Claim your hero sword!", a: ["Claim", "Reject", "Maybe"], c: 0, r: "英雄劍 🗡️", e: 9 }
+            { q: "如果你遇到黑熊，請慢慢後退。", eq: "If you encounter a bear, back away slowly.", a: ["Run away", "Back away slowly", "Play dead"], c: 1, r: "防護頭盔 ⛑️" },
+            { q: "在劇烈亂流中，請穿上救生衣。", eq: "In severe turbulence, wear a life jacket.", a: ["Wear life jacket", "Jump", "Stand up"], c: 0, r: "救生衣 🦺" },
+            { q: "土石流發生時，往兩側高處逃。", eq: "When a landslide occurs, move sideways.", a: ["Move sideways", "Run down", "Stay still"], c: 0, r: "登山靴 👢" },
+            { q: "若被蜜蜂追，躲進封閉的遮蔽處。", eq: "If chased by bees, run to a shelter.", a: ["Jump in water", "Run to shelter", "Swat"], c: 1, r: "防蟲網 🕸️" },
+            { q: "被蛇咬傷後，保持傷口低於心臟。", eq: "Keep the wound below the heart after a snake bite.", a: ["Suck venom", "Keep below heart", "Run"], c: 1, r: "急救包 🩹" },
+            { q: "打雷時，絕對不要躲在大樹下。", eq: "Never hide under a tree during a thunderstorm.", a: ["Low ground", "Under a tree", "Inside car"], c: 1, r: "絕緣衣 ⚡" },
+            { q: "如果你在森林迷路，留在原地待援。", eq: "If lost in the forest, stay where you are.", a: ["Keep walking", "Stay where you are", "Shout"], c: 1, r: "哨子  whistle" },
+            { q: "遇森林火災，往逆風方向逃生。", eq: "Run upwind to escape a forest fire.", a: ["Downwind", "Upwind", "Up hill"], c: 1, r: "呼吸罩 😷" },
+            { q: "溪水變濁代表上游可能有山洪。", eq: "Muddy water means a flash flood is coming.", a: ["Swimming", "Hiking", "Flash flood"], c: 2, r: "救生索 🪢" },
+            { q: "恭喜！領取你的英雄劍！", eq: "Congrats! Claim your hero sword!", a: ["Claim", "Reject", "Maybe"], c: 0, r: "英雄劍 🗡️" }
         ];
 
         const funnyLines = [
-            "哎呀！這答案讓小雞嚇到掉毛了！ / Oops! Chick lost its feathers!",
-            "這個選擇比沒電的 GPS 還迷茫。 / More lost than a dead GPS.",
-            "小雞說：這不是正確的求生之道！ / Not the right way to survive!",
-            "你確定嗎？小雞開始流汗了... / Are you sure? Chick is sweating...",
-            "糟糕！黑熊正在旁邊偷笑喔。 / Oh no! The bear is laughing at you."
+            "哎呀！這選擇讓小雞嚇到旋轉！ / Oops! Chick is spinning in shock!",
+            "這答案比沒訊號的手機還沒用。 / More useless than a phone with no signal.",
+            "小雞說：這不是冒險，這是冒失！ / Chick says: That's reckless!",
+            "你確定嗎？小雞開始發抖了... / Are you sure? Chick is shaking...",
+            "糟糕！黑熊正在旁邊給你負評。 / Oh no! The bear is giving you a thumbs down."
         ];
 
         let currentStage = "easy"; 
         let currentIdx = 0;
         let score = 0;
         let solvedCount = 0;
+        let eqCount = 0;
         const totalQuestions = 30;
 
-        function speak(text, callback) {
+        function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            utterance.rate = 0.95;
-            if (callback) utterance.onend = callback;
+            utterance.rate = 1;
             window.speechSynthesis.speak(utterance);
         }
 
         function initGame() {
-            score = 0; currentIdx = 0; solvedCount = 0; currentStage = "easy";
-            speak("Let's go! Time to be a hero!", () => loadQuestion());
+            score = 0; currentIdx = 0; solvedCount = 0; eqCount = 0;
+            currentStage = "easy";
+            speak("Let's go! Survival adventure begins!");
+            loadQuestion();
         }
 
         function loadQuestion() {
@@ -236,7 +296,7 @@
                 const btn = document.createElement('button');
                 btn.innerText = opt;
                 btn.onclick = () => {
-                    speak(opt); // 點擊時唸出單字
+                    speak(opt);
                     checkAnswer(i, btn);
                 };
                 container.appendChild(btn);
@@ -251,63 +311,61 @@
             const buttons = document.querySelectorAll('#options-container button');
             buttons.forEach(b => b.disabled = true);
 
-            const isCorrect = idx === data.c;
+            if(idx === data.c) {
+                btn.classList.add('correct');
+                score += (currentStage === "easy" ? 10 : currentStage === "medium" ? 20 : 30);
+                document.getElementById('chick-speech').innerText = "Excellent! Perfect move!";
+                speak("Excellent!");
+                chickAction('happy');
+                
+                if(data.r) {
+                    setTimeout(() => {
+                        const eqItem = document.querySelector(`.eq-${eqCount}`);
+                        if(eqItem) {
+                            eqItem.innerText = data.r.split(' ')[0];
+                            eqItem.classList.add('active');
+                            eqCount++;
+                        }
+                        document.getElementById('chick-speech').innerText = `Item Unlocked: ${data.r}`;
+                    }, 500);
+                }
+            } else {
+                btn.classList.add('wrong');
+                buttons[data.c].classList.add('correct');
+                document.getElementById('chick-speech').innerText = funnyLines[Math.floor(Math.random()*funnyLines.length)];
+                speak("Oops! Wrong way!");
+                chickAction('shake');
+            }
+
+            document.getElementById('score-val').innerText = score;
+            solvedCount++;
+            currentIdx++;
 
             setTimeout(() => {
-                if(isCorrect) {
-                    btn.classList.add('correct');
-                    let points = (currentStage === "easy") ? 10 : (currentStage === "medium" ? 20 : 30);
-                    score += points;
-                    document.getElementById('chick-speech').innerText = "Excellent! You got it!";
-                    document.getElementById('chick-sprite').classList.add('happy');
-                    speak("Excellent!");
-                    
-                    if(data.r) {
-                        setTimeout(() => {
-                            const eqItem = document.querySelector(`.eq-${data.e}`);
-                            if(eqItem) eqItem.classList.add('active');
-                            document.getElementById('chick-speech').innerText = `Item unlocked: ${data.r}`;
-                        }, 500);
-                    }
-                    setTimeout(() => document.getElementById('chick-sprite').classList.remove('happy'), 500);
-                } else {
-                    btn.classList.add('wrong');
-                    buttons[data.c].classList.add('correct');
-                    const humor = funnyLines[Math.floor(Math.random()*funnyLines.length)];
-                    document.getElementById('chick-speech').innerText = humor;
-                    document.getElementById('chick-sprite').classList.add('shake');
-                    speak("Oops! Try again next time.");
-                    setTimeout(() => document.getElementById('chick-sprite').classList.remove('shake'), 400);
-                }
-
-                document.getElementById('score-val').innerText = score;
-                solvedCount++;
-                currentIdx++;
-
-                setTimeout(() => {
-                    if(currentIdx >= 10) {
-                        if(currentStage === "easy") {
-                            speak("Amazing hero! Entering Medium Stage!");
-                            currentStage = "medium"; currentIdx = 0; loadQuestion();
-                        } else if(currentStage === "medium") {
-                            speak("Great job! Entering Hard Stage!");
-                            currentStage = "hard"; currentIdx = 0; loadQuestion();
-                        } else {
-                            finishGame();
-                        }
+                if(currentIdx >= 10) {
+                    if(currentStage === "easy") {
+                        speak("Stage clear! Entering Medium Stage!");
+                        currentStage = "medium"; currentIdx = 0; loadQuestion();
+                    } else if(currentStage === "medium") {
+                        speak("Gear check complete! Entering Danger Zone!");
+                        currentStage = "hard"; currentIdx = 0; loadQuestion();
                     } else {
-                        loadQuestion();
+                        finishGame();
                     }
-                }, 2500);
-            }, 600); // 稍微延遲以確保玩家聽完點擊的單字發音
+                } else {
+                    loadQuestion();
+                }
+            }, 3000);
         }
 
         function finishGame() {
             document.getElementById('progress-bar').style.width = '100%';
             document.getElementById('ceremony').style.display = 'flex';
-            document.getElementById('ceremony-text').innerText = `A legend is born! You passed 30 challenges.\nYou mastered survival skills and advanced English patterns.\nFinal Score: ${score}`;
-            speak("Congratulations! You are a bilingual survival master!");
+            document.getElementById('ceremony-text').innerText = `Survival Legend Born!\nScore: ${score} points.\nYou are ready for the wild!`;
+            speak("Congratulations! You are a survival hero!");
         }
+
+        window.onload = init3D;
     </script>
 </body>
 </html>
