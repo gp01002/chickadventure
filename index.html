@@ -14,9 +14,9 @@
             --gold: #ffd700;
         }
 
-        body.easy { --scene-bg: #e8f5e9; --scene-accent: #2e7d32; }
-        body.medium { --scene-bg: #fff3e0; --scene-accent: #e65100; }
-        body.hard { --scene-bg: #37474f; --scene-accent: #ff5252; --text-color: #fff; }
+        body.easy { --scene-bg: #e8f5e9; --scene-accent: #2e7d32; background-image: url('bg_easy.jpg'); }
+        body.medium { --scene-bg: #fff3e0; --scene-accent: #e65100; background-image: url('bg_medium.jpg'); }
+        body.hard { --scene-bg: #37474f; --scene-accent: #ff5252; --text-color: #fff; background-image: url('bg_hard.jpg'); }
 
         * { box-sizing: border-box; transition: background-color 0.8s ease; }
 
@@ -24,62 +24,84 @@
             background-color: var(--scene-bg);
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; margin: 0; color: var(--text-color); overflow: hidden; position: relative;
-            /* 背景圖層級預設 */
+            min-height: 100vh; margin: 0; color: var(--text-color); overflow-x: hidden; position: relative;
+            /* 背景圖層級與呈現設定 */
             background-size: cover;
             background-position: center;
-            background-blend-mode: overlay;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-blend-mode: multiply; /* 混合模式讓背景色與圖片結合 */
         }
-
-        /* 背景圖樣式切換 (若已上傳圖片可取消註解) */
-        /* body.easy { background-image: url('bg_easy.jpg'); }
-        body.medium { background-image: url('bg_medium.jpg'); }
-        body.hard { background-image: url('bg_hard.jpg'); }
-        */
 
         #top-info {
             position: fixed; top: 20px; width: 90%; max-width: 500px;
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.9); padding: 12px 25px; border-radius: 50px;
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(5px);
+            padding: 12px 25px; border-radius: 50px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; color: #333;
         }
 
         /* 3D 畫布容器 */
         #canvas-container {
-            width: 250px; height: 250px;
-            margin-bottom: 10px; z-index: 5;
-            cursor: pointer;
+            width: 280px; height: 280px;
+            margin-bottom: 5px; z-index: 5;
+            position: relative;
+            /* 輕微投影讓角色浮現 */
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2));
         }
 
         #chick-speech { 
-            margin-top: 10px; padding: 12px 20px; 
-            background: white; border-radius: 15px; 
+            margin-top: 5px; padding: 12px 20px; 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(4px);
+            border-radius: 15px; 
             font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            position: relative; color: #333; max-width: 320px; 
-            text-align: center; font-size: 15px;
+            position: relative; color: #333; max-width: 350px; 
+            text-align: center; font-size: 15px; min-height: 50px;
+            display: flex; align-items: center; justify-content: center;
         }
 
         #game-box {
-            background: white; padding: 25px; border-radius: 28px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-            text-align: center; width: 95%; max-width: 500px; 
-            z-index: 5; color: #333; margin-top: 10px;
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(8px);
+            padding: 25px; border-radius: 28px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center; width: 95%; max-width: 520px; 
+            z-index: 5; color: #333; margin-top: 15px;
         }
 
-        .stage-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; background: #eee; font-size: 12px; margin-bottom: 8px; font-weight: 800; color: var(--scene-accent); }
-        .question { font-size: 17px; margin-bottom: 15px; line-height: 1.5; font-weight: 600; text-align: left; }
-        .en-q { color: #666; font-style: italic; font-size: 14px; display: block; margin-top: 5px; border-left: 3px solid var(--scene-accent); padding-left: 10px; }
+        .stage-badge { display: inline-block; padding: 4px 15px; border-radius: 20px; background: #eee; font-size: 13px; margin-bottom: 10px; font-weight: 800; color: var(--scene-accent); }
+        .question { font-size: 18px; margin-bottom: 15px; line-height: 1.5; font-weight: 600; text-align: left; }
+        .en-q { color: #555; font-style: italic; font-size: 15px; display: block; margin-top: 5px; border-left: 4px solid var(--scene-accent); padding-left: 12px; }
 
-        .options-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
 
         button {
-            padding: 14px 20px; border: 2px solid #eee; background: #fff; border-radius: 12px;
+            padding: 15px 20px; border: 2px solid #ddd; background: #fff; border-radius: 14px;
             cursor: pointer; font-size: 18px; font-weight: bold; color: #444; transition: all 0.2s;
             display: flex; align-items: center; justify-content: center;
         }
-        button:hover:not(:disabled) { border-color: var(--scene-accent); transform: scale(1.02); }
-        button.correct { background: #81c784 !important; color: white; border-color: #81c784; }
-        button.wrong { background: #e57373 !important; color: white; border-color: #e57373; }
+        button:hover:not(:disabled) { border-color: var(--scene-accent); background: #fdfdfd; transform: scale(1.02); }
+        button.correct { background: #81c784 !important; color: white !border-color: #81c784; }
+        button.wrong { background: #e57373 !important; color: white !border-color: #e57373; }
+
+        #equipment-slots {
+            position: absolute; width: 100%; height: 100%;
+            top: 0; left: 0; pointer-events: none;
+        }
+        .eq-item { 
+            position: absolute; font-size: 36px; opacity: 0; 
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            transform: scale(0); filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+        }
+        .eq-item.active { opacity: 1; transform: scale(1); }
+        
+        /* 裝備位置優化 */
+        .eq-0 { top: 10%; left: 5%; }   .eq-1 { top: 0%; left: 40%; }  .eq-2 { top: 10%; right: 5%; }
+        .eq-3 { top: 45%; left: -10%; } .eq-4 { top: 45%; right: -10%; } .eq-5 { bottom: 20%; left: 0%; }
+        .eq-6 { bottom: 5%; left: 40%; } .eq-7 { bottom: 20%; right: 0%; }
+        .eq-8 { top: 25%; left: 15%; }  .eq-9 { top: 25%; right: 15%; }
 
         #ceremony {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95);
@@ -96,103 +118,120 @@
         <span>得分: <strong id="score-val">0</strong></span>
     </div>
 
-    <!-- 3D 小雞渲染位置 -->
-    <div id="canvas-container"></div>
+    <div id="canvas-container">
+        <div id="equipment-slots">
+            <div class="eq-item eq-0">🧭</div><div class="eq-item eq-1">🎒</div><div class="eq-item eq-2">🍼</div>
+            <div class="eq-item eq-3">🧥</div><div class="eq-item eq-4">🛰️</div>
+            <div class="eq-item eq-5">⛑️</div><div class="eq-item eq-6">🦺</div><div class="eq-item eq-7">👢</div>
+            <div class="eq-item eq-8">🕸️</div><div class="eq-item eq-9">🗡️</div>
+        </div>
+    </div>
     
-    <div id="chick-speech">"點擊下方按鈕開始！<br>Click to start!"</div>
+    <div id="chick-speech">"點擊按鈕聽發音並挑戰！<br>Click to hear and challenge!"</div>
 
     <div id="game-box">
-        <div class="stage-badge" id="stage-info">MISSION START</div>
-        <div class="question" id="question-text">準備好參加 30 題雙語生存測驗了嗎？<span class="en-q">Ready for the 30-question bilingual test?</span></div>
+        <div class="stage-badge" id="stage-info">START</div>
+        <div class="question" id="question-text">挑戰開始！請確保音量已開啟。<span class="en-q">Test started! Please ensure sound is on.</span></div>
         <div class="options-grid" id="options-container">
             <button onclick="initGame()" style="background: var(--gold); border:none;">Let's Go! 🚀</button>
         </div>
     </div>
 
     <div id="ceremony">
-        <div style="font-size: 80px;">🏆</div>
-        <h1 style="color: var(--gold); font-size: 2rem;">LEGENDARY HERO</h1>
-        <p id="ceremony-text" style="padding: 0 40px; line-height: 1.6;"></p>
-        <button onclick="location.reload()" style="background: var(--gold); border:none; padding: 15px 40px; border-radius:50px; font-weight:bold; margin-top:20px; cursor:pointer;">Play Again / 再次挑戰</button>
+        <div style="font-size: 100px; margin-bottom: 20px;">🏆</div>
+        <h1 style="color: var(--gold); font-size: 2.5rem; margin: 10px 0;">LEGENDARY HERO</h1>
+        <p id="ceremony-text" style="padding: 0 40px; line-height: 1.8; font-size: 18px;"></p>
+        <button onclick="location.reload()" style="background: var(--gold); border:none; padding: 15px 45px; border-radius:50px; font-weight:bold; margin-top:30px; cursor:pointer; font-size: 18px;">Play Again / 再次挑戰</button>
     </div>
 
     <div id="progress-bar"></div>
 
     <script>
-        // --- 1. Three.js 3D 小雞建構 ---
+        // --- 1. Three.js 3D 小雞渲染引擎 ---
         let scene, camera, renderer, chickGroup;
+        
         function init3D() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+            
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(250, 250);
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
 
-            // 光源
-            const light = new THREE.DirectionalLight(0xffffff, 1);
-            light.position.set(5, 5, 5).normalize();
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            // 強力光源確保小雞在不同背景下都清晰
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight.position.set(5, 10, 7.5);
+            scene.add(dirLight);
+            
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambLight);
 
-            // 小雞身體
+            // 小雞角色模型
             chickGroup = new THREE.Group();
+            
+            // 身體 (Sphere)
             const bodyGeo = new THREE.SphereGeometry(1, 32, 32);
             const bodyMat = new THREE.MeshToonMaterial({ color: 0xffec85 });
             const body = new THREE.Mesh(bodyGeo, bodyMat);
-            body.scale.set(1, 1.1, 1);
+            body.scale.set(1, 1.15, 1);
             chickGroup.add(body);
 
             // 眼睛
-            const eyeGeo = new THREE.SphereGeometry(0.1, 16, 16);
-            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x333333 });
+            const eyeGeo = new THREE.SphereGeometry(0.12, 16, 16);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
             const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-            eyeL.position.set(0.35, 0.3, 0.85);
+            eyeL.position.set(0.35, 0.4, 0.85);
             const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-            eyeR.position.set(-0.35, 0.3, 0.85);
+            eyeR.position.set(-0.35, 0.4, 0.85);
             chickGroup.add(eyeL, eyeR);
 
-            // 嘴巴 (圓錐體)
-            const beakGeo = new THREE.ConeGeometry(0.2, 0.4, 16);
+            // 嘴巴 (Cone)
+            const beakGeo = new THREE.ConeGeometry(0.2, 0.45, 16);
             const beakMat = new THREE.MeshToonMaterial({ color: 0xff9d42 });
             const beak = new THREE.Mesh(beakGeo, beakMat);
-            beak.position.set(0, 0, 1);
+            beak.position.set(0, 0.05, 1);
             beak.rotation.x = Math.PI / 2;
             chickGroup.add(beak);
 
             scene.add(chickGroup);
-            camera.position.z = 4;
+            camera.position.set(0, 0.5, 5);
+            camera.lookAt(0, 0, 0);
+
             animate();
         }
 
         function animate() {
             requestAnimationFrame(animate);
             if (chickGroup) {
-                chickGroup.rotation.y += 0.01;
+                chickGroup.rotation.y += 0.015; // 持續慢速旋轉
             }
             renderer.render(scene, camera);
         }
 
-        // 3D 小雞動態反應
         function chickAction(type) {
+            if (!chickGroup) return;
             if (type === 'happy') {
-                chickGroup.position.y = 0;
-                let jumpCount = 0;
+                let t = 0;
                 const jump = setInterval(() => {
-                    chickGroup.position.y = Math.abs(Math.sin(jumpCount)) * 0.8;
-                    chickGroup.rotation.z = Math.sin(jumpCount) * 0.2;
-                    jumpCount += 0.2;
-                    if (jumpCount > Math.PI * 2) {
+                    chickGroup.position.y = Math.abs(Math.sin(t)) * 1.5;
+                    chickGroup.rotation.z = Math.sin(t * 2) * 0.4;
+                    t += 0.2;
+                    if (t > Math.PI * 2) {
                         clearInterval(jump);
                         chickGroup.position.y = 0;
                         chickGroup.rotation.z = 0;
                     }
                 }, 20);
             } else {
-                let shakeCount = 0;
+                let t = 0;
                 const shake = setInterval(() => {
-                    chickGroup.position.x = Math.sin(shakeCount * 5) * 0.1;
-                    shakeCount += 0.2;
-                    if (shakeCount > 4) {
+                    chickGroup.position.x = Math.sin(t * 10) * 0.2;
+                    t += 0.3;
+                    if (t > 4) {
                         clearInterval(shake);
                         chickGroup.position.x = 0;
                     }
@@ -200,7 +239,7 @@
             }
         }
 
-        // --- 2. 題庫與遊戲邏輯 ---
+        // --- 2. 測驗資料與邏輯 ---
         const easyData = [
             { q: "森林是一個複雜的「生態系統」。", eq: "The forest is a complex 'Ecosystem'.", a: ["Economy", "Ecosystem", "Biology"], c: 1 },
             { q: "植物透過「光合作用」製造能量。", eq: "Plants produce energy through 'Photosynthesis'.", a: ["Photosynthesis", "Photography", "Physics"], c: 0 },
@@ -234,16 +273,16 @@
             { q: "若被蜜蜂追，躲進封閉的遮蔽處。", eq: "If chased by bees, run to a shelter.", a: ["Jump in water", "Run to shelter", "Swat"], c: 1, r: "防蟲網 🕸️" },
             { q: "被蛇咬傷後，保持傷口低於心臟。", eq: "Keep the wound below the heart after a snake bite.", a: ["Suck venom", "Keep below heart", "Run"], c: 1, r: "急救包 🩹" },
             { q: "打雷時，絕對不要躲在大樹下。", eq: "Never hide under a tree during a thunderstorm.", a: ["Low ground", "Under a tree", "Inside car"], c: 1, r: "絕緣衣 ⚡" },
-            { q: "如果你在森林迷路，留在原地待援。", eq: "If lost in the forest, stay where you are.", a: ["Keep walking", "Stay where you are", "Shout"], c: 1, r: "哨子  whistle" },
+            { q: "如果你在森林迷路，留在原地待援。", eq: "If lost in the forest, stay where you are.", a: ["Keep walking", "Stay where you are", "Shout"], c: 1, r: "哨子 🔔" },
             { q: "遇森林火災，往逆風方向逃生。", eq: "Run upwind to escape a forest fire.", a: ["Downwind", "Upwind", "Up hill"], c: 1, r: "呼吸罩 😷" },
             { q: "溪水變濁代表上游可能有山洪。", eq: "Muddy water means a flash flood is coming.", a: ["Swimming", "Hiking", "Flash flood"], c: 2, r: "救生索 🪢" },
             { q: "恭喜！領取你的英雄劍！", eq: "Congrats! Claim your hero sword!", a: ["Claim", "Reject", "Maybe"], c: 0, r: "英雄劍 🗡️" }
         ];
 
         const funnyLines = [
-            "哎呀！這選擇讓小雞嚇到旋轉！ / Oops! Chick is spinning in shock!",
-            "這答案比沒訊號的手機還沒用。 / More useless than a phone with no signal.",
-            "小雞說：這不是冒險，這是冒失！ / Chick says: That's reckless!",
+            "哎呀！這答案讓小雞嚇到旋轉！ / Oops! Chick is spinning in shock!",
+            "這答案比沒訊號的手機還令人迷茫。 / More confusing than a dead phone.",
+            "小雞說：這不是冒險，這是冒失喔！ / Chick says: That's reckless!",
             "你確定嗎？小雞開始發抖了... / Are you sure? Chick is shaking...",
             "糟糕！黑熊正在旁邊給你負評。 / Oh no! The bear is giving you a thumbs down."
         ];
@@ -265,6 +304,7 @@
         function initGame() {
             score = 0; currentIdx = 0; solvedCount = 0; eqCount = 0;
             currentStage = "easy";
+            document.querySelectorAll('.eq-item').forEach(el => el.classList.remove('active'));
             speak("Let's go! Survival adventure begins!");
             loadQuestion();
         }
@@ -322,7 +362,6 @@
                     setTimeout(() => {
                         const eqItem = document.querySelector(`.eq-${eqCount}`);
                         if(eqItem) {
-                            eqItem.innerText = data.r.split(' ')[0];
                             eqItem.classList.add('active');
                             eqCount++;
                         }
@@ -361,11 +400,13 @@
         function finishGame() {
             document.getElementById('progress-bar').style.width = '100%';
             document.getElementById('ceremony').style.display = 'flex';
-            document.getElementById('ceremony-text').innerText = `Survival Legend Born!\nScore: ${score} points.\nYou are ready for the wild!`;
+            document.getElementById('ceremony-text').innerText = `Survival Legend Born!\nYou completed 30 challenges with ${score} points.\nYou are ready for any adventure in the wild!`;
             speak("Congratulations! You are a survival hero!");
         }
 
-        window.onload = init3D;
+        document.addEventListener('DOMContentLoaded', () => {
+            init3D();
+        });
     </script>
 </body>
 </html>
