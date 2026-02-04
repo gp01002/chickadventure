@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小雞英文冒險 - 3D 互動動態版</title>
+    <title>小雞英文冒險 - 3D 佈局優化版</title>
     <!-- 引入 Three.js 與 GLTF 載入器 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -25,80 +25,88 @@
         body {
             background-color: var(--scene-bg);
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             min-height: 100vh; margin: 0; color: var(--text-color); overflow: hidden; position: relative;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-blend-mode: soft-light;
+            padding-top: 60px; /* 為固定標題騰出空間 */
         }
 
         #top-info {
-            position: fixed; top: 20px; width: 90%; max-width: 500px;
+            position: fixed; top: 10px; width: 95%; max-width: 500px;
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(255, 255, 255, 0.9); 
             backdrop-filter: blur(8px);
-            padding: 12px 25px; border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 10; color: #333;
+            padding: 8px 20px; border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 10; color: #333;
         }
 
+        /* 縮小 3D 畫布容器以節省空間 */
         #canvas-container {
-            width: 320px; height: 320px;
-            margin-bottom: 5px; z-index: 5;
+            width: 220px; height: 220px;
+            margin-bottom: 2px; z-index: 5;
             position: relative;
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));
+            flex-shrink: 0; /* 防止被壓縮 */
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
         }
 
+        /* 緊湊化對話框 */
         #chick-speech { 
-            margin-top: 5px; padding: 12px 20px; 
+            margin-top: 0px; padding: 8px 15px; 
             background: rgba(255, 255, 255, 0.95); 
             backdrop-filter: blur(4px);
-            border-radius: 15px; 
-            font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            position: relative; color: #333; max-width: 350px; 
-            text-align: center; font-size: 15px; min-height: 55px;
+            border-radius: 12px; 
+            font-weight: bold; box-shadow: 0 3px 8px rgba(0,0,0,0.1); 
+            position: relative; color: #333; max-width: 320px; 
+            text-align: center; font-size: 14px; min-height: 45px;
             display: flex; align-items: center; justify-content: center;
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            z-index: 6;
         }
 
+        /* 優化遊戲盒佈局 */
         #game-box {
             background: rgba(255, 255, 255, 0.92); 
             backdrop-filter: blur(12px);
-            padding: 20px; border-radius: 28px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            text-align: center; width: 95%; max-width: 520px; 
-            z-index: 5; color: #333; margin-top: 15px;
+            padding: 15px; border-radius: 20px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            text-align: center; width: 95%; max-width: 500px; 
+            z-index: 5; color: #333; margin-top: 10px;
+            max-height: 45vh; /* 限制高度，避免超出螢幕 */
+            overflow-y: auto; /* 內容過多時可滾動 */
         }
 
-        .stage-badge { display: inline-block; padding: 4px 15px; border-radius: 20px; background: #eee; font-size: 12px; margin-bottom: 8px; font-weight: 800; color: var(--scene-accent); }
-        .question { font-size: 18px; margin-bottom: 12px; line-height: 1.5; font-weight: 600; text-align: left; }
-        .en-q { color: #555; font-style: italic; font-size: 15px; display: block; margin-top: 5px; border-left: 4px solid var(--scene-accent); padding-left: 12px; }
+        .stage-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; background: #eee; font-size: 11px; margin-bottom: 5px; font-weight: 800; color: var(--scene-accent); }
+        .question { font-size: 16px; margin-bottom: 10px; line-height: 1.4; font-weight: 600; text-align: left; }
+        .en-q { color: #555; font-style: italic; font-size: 14px; display: block; margin-top: 2px; border-left: 3px solid var(--scene-accent); padding-left: 10px; }
 
-        .options-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
 
         button {
-            padding: 12px 20px; border: 2px solid #ddd; background: #fff; border-radius: 14px;
-            cursor: pointer; font-size: 17px; font-weight: bold; color: #444; transition: all 0.2s;
+            padding: 10px 15px; border: 1px solid #ddd; background: #fff; border-radius: 10px;
+            cursor: pointer; font-size: 16px; font-weight: bold; color: #444; transition: all 0.2s;
         }
-        button:hover:not(:disabled) { border-color: var(--scene-accent); background: #fdfdfd; transform: scale(1.02); }
+        button:hover:not(:disabled) { border-color: var(--scene-accent); background: #fdfdfd; transform: scale(1.01); }
         button.correct { background: #81c784 !important; color: white; border-color: #81c784; }
         button.wrong { background: #e57373 !important; color: white; border-color: #e57373; }
 
+        /* 裝備顯示縮放 */
         #equipment-slots {
             position: absolute; width: 100%; height: 100%;
             top: 0; left: 0; pointer-events: none;
         }
         .eq-item { 
-            position: absolute; font-size: 45px; opacity: 0; 
+            position: absolute; font-size: 30px; opacity: 0; 
             transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            transform: scale(0); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            transform: scale(0); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
         }
         .eq-item.active { opacity: 1; transform: scale(1); }
         
-        /* 裝備位置 */
         .eq-0 { top: 5%; left: 0%; }    .eq-1 { top: -5%; left: 40%; }  .eq-2 { top: 5%; right: 0%; }
-        .eq-3 { top: 40%; left: -15%; } .eq-4 { top: 40%; right: -15%; } .eq-5 { bottom: 15%; left: -5%; }
+        .eq-3 { top: 40%; left: -10%; } .eq-4 { top: 40%; right: -10%; } .eq-5 { bottom: 15%; left: -5%; }
         .eq-6 { bottom: 0%; left: 40%; } .eq-7 { bottom: 15%; right: -5%; }
         .eq-8 { top: 20%; left: 10%; }   .eq-9 { top: 20%; right: 10%; }
 
@@ -107,26 +115,26 @@
             display: none; flex-direction: column; align-items: center; justify-content: center;
             color: white; z-index: 100; text-align: center;
         }
-        #progress-bar { position: fixed; bottom: 0; left: 0; height: 10px; background: var(--scene-accent); width: 0%; transition: width 0.5s; }
+        #progress-bar { position: fixed; bottom: 0; left: 0; height: 6px; background: var(--scene-accent); width: 0%; transition: width 0.5s; }
     </style>
 </head>
 <body class="easy">
 
     <div id="top-info">
-        <span id="scene-name">🌲 容易階段：單字挑戰</span>
-        <span>得分: <strong id="score-val">0</strong></span>
+        <span id="scene-name">🌲 Easy: Vocabulary</span>
+        <span>Score: <strong id="score-val">0</strong></span>
     </div>
 
     <div id="canvas-container">
         <div id="equipment-slots">
             <div class="eq-item eq-0">🧭</div><div class="eq-item eq-1">🎒</div><div class="eq-item eq-2">🍼</div>
             <div class="eq-item eq-3">🧥</div><div class="eq-item eq-4">🛰️</div>
-            <div class="eq-item eq-5">⛑️</div><div class="eq-item eq-6">🦺</div><div class="eq-item eq-7">ブーツ</div>
+            <div class="eq-item eq-5">⛑️</div><div class="eq-item eq-6">🦺</div><div class="eq-item eq-7">👢</div>
             <div class="eq-item eq-8">😷</div><div class="eq-item eq-9">🗡️</div>
         </div>
     </div>
     
-    <div id="chick-speech">"準備好要去冒險了嗎？<br>Ready to go?"</div>
+    <div id="chick-speech">"準備好要去冒險了嗎？ Ready to go?"</div>
 
     <div id="game-box">
         <div class="stage-badge" id="stage-info">MISSION START</div>
@@ -137,19 +145,20 @@
     </div>
 
     <div id="ceremony">
-        <div style="font-size: 100px; margin-bottom: 20px;">🏆</div>
-        <h1 style="color: var(--gold); font-size: 2.5rem; margin: 10px 0;">SURVIVAL HERO</h1>
-        <p id="ceremony-text" style="padding: 0 40px; line-height: 1.8; font-size: 18px;"></p>
-        <button onclick="location.reload()" style="background: var(--gold); border:none; padding: 15px 45px; border-radius:50px; font-weight:bold; margin-top:30px; cursor:pointer; font-size: 18px;">再次啟程 / Replay</button>
+        <div style="font-size: 80px;">🏆</div>
+        <h1 style="color: var(--gold); font-size: 2rem; margin: 10px 0;">SURVIVAL HERO</h1>
+        <p id="ceremony-text" style="padding: 0 40px; line-height: 1.8; font-size: 16px;"></p>
+        <button onclick="location.reload()" style="background: var(--gold); border:none; padding: 12px 40px; border-radius:50px; font-weight:bold; margin-top:20px; cursor:pointer;">再次啟程 / Replay</button>
     </div>
 
     <div id="progress-bar"></div>
 
     <script>
-        // --- 1. 3D 渲染系統 (整合互動與動畫) ---
+        // --- 1. 3D 渲染系統 ---
         let scene, camera, renderer, chickModel;
-        let animationType = 'idle'; // 'idle', 'happy', 'shake'
+        let animationType = 'idle';
         let animationProgress = 0;
+        let baseScale = 1; // 用於固定初始比例
 
         function init3D() {
             const container = document.getElementById('canvas-container');
@@ -157,59 +166,49 @@
             camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
 
-            // 光源
             const ambLight = new THREE.AmbientLight(0xffffff, 0.9);
             scene.add(ambLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
             dirLight.position.set(5, 10, 7.5);
             scene.add(dirLight);
 
-            // 載入模型
             const loader = new THREE.GLTFLoader();
             loader.load('plush.glb', (gltf) => {
                 chickModel = gltf.scene;
-                // 自動居中並縮放
                 const box = new THREE.Box3().setFromObject(chickModel);
                 const center = box.getCenter(new THREE.Vector3());
                 const size = box.getSize(new THREE.Vector3()).length();
                 chickModel.position.sub(center); 
-                chickModel.scale.setScalar(3.2 / size);
+                // 儲存初始比例，解決時大時小問題
+                baseScale = 2.8 / size; 
+                chickModel.scale.setScalar(baseScale);
                 scene.add(chickModel);
             });
 
-            camera.position.set(0, 0.5, 6);
+            camera.position.set(0, 0, 5);
             animate();
         }
 
         function animate() {
             requestAnimationFrame(animate);
             if (chickModel) {
-                // 基礎行為：持續緩慢旋轉
                 chickModel.rotation.y += 0.01;
 
-                // 互動行為處理
                 if (animationType === 'happy') {
                     animationProgress += 0.1;
-                    // 跳躍動畫
-                    chickModel.position.y = Math.abs(Math.sin(animationProgress)) * 1.5;
-                    // 側翻旋轉
-                    chickModel.rotation.z = Math.sin(animationProgress * 2) * 0.5;
-                    // 答對時稍微變大
-                    chickModel.scale.setScalar((3.2 / 5) * (1 + Math.sin(animationProgress) * 0.2));
+                    chickModel.position.y = Math.abs(Math.sin(animationProgress)) * 1.2;
+                    chickModel.rotation.z = Math.sin(animationProgress * 2) * 0.4;
+                    // 基於 baseScale 做縮放變化
+                    chickModel.scale.setScalar(baseScale * (1 + Math.sin(animationProgress) * 0.15));
 
-                    if (animationProgress > Math.PI * 2) {
-                        resetAnimation();
-                    }
+                    if (animationProgress > Math.PI * 2) resetAnimation();
                 } else if (animationType === 'shake') {
-                    animationProgress += 0.25;
-                    // 快速左右抖動
-                    chickModel.position.x = Math.sin(animationProgress * 5) * 0.2;
-                    
-                    if (animationProgress > 5) {
-                        resetAnimation();
-                    }
+                    animationProgress += 0.3;
+                    chickModel.position.x = Math.sin(animationProgress * 5) * 0.15;
+                    if (animationProgress > 5) resetAnimation();
                 }
             }
             renderer.render(scene, camera);
@@ -221,6 +220,7 @@
             if (chickModel) {
                 chickModel.position.set(0, 0, 0);
                 chickModel.rotation.z = 0;
+                chickModel.scale.setScalar(baseScale); // 回到正確比例
             }
         }
 
@@ -229,7 +229,7 @@
             animationProgress = 0;
         }
 
-        // --- 2. 測驗資料與核心邏輯 ---
+        // --- 2. 測驗內容 (10-10-10) ---
         const easyData = [
             { q: "森林是一個複雜的「生態系統」。", eq: "The forest is a complex 'Ecosystem'.", a: ["Economy", "Ecosystem", "Biology"], c: 1 },
             { q: "植物透過「光合作用」製造能量。", eq: "Plants produce energy through 'Photosynthesis'.", a: ["Photosynthesis", "Photography", "Physics"], c: 0 },
@@ -270,11 +270,11 @@
         ];
 
         const funnyLines = [
-            "哎呀！小雞嚇到毛都炸開了！ / Oops! Chick is in shock!",
-            "這個答案比沒收訊的對講機還沒用。 / More useless than a broken radio.",
-            "小雞說：這不是勇敢，這是冒失！ / That's not brave, that's reckless!",
-            "你確定嗎？小雞緊張到想挖地洞... / Are you sure? Chick wants to hide...",
-            "糟糕！黑熊正在旁邊給你負評。 / Oh no! The bear is judging you."
+            "哎呀！小雞嚇到毛都炸開了！ / Oops!",
+            "這個答案比沒收訊的對講機還沒用。",
+            "小雞說：這不是勇敢，這是冒失！",
+            "你確定嗎？小雞緊張到想挖地洞...",
+            "糟糕！黑熊正在旁邊給你負評。"
         ];
 
         let currentStage = "easy"; 
@@ -295,7 +295,7 @@
             score = 0; currentIdx = 0; solvedCount = 0; eqCount = 0;
             currentStage = "easy";
             document.querySelectorAll('.eq-item').forEach(el => el.classList.remove('active'));
-            speak("Let's go! Survival adventure begins!");
+            speak("Let's go!");
             loadQuestion();
         }
 
@@ -344,9 +344,9 @@
             if(idx === data.c) {
                 btn.classList.add('correct');
                 score += (currentStage === "easy" ? 10 : currentStage === "medium" ? 20 : 30);
-                document.getElementById('chick-speech').innerText = "Excellent! Perfect move!";
+                document.getElementById('chick-speech').innerText = "Excellent! ✨";
                 speak("Excellent!");
-                triggerAction('happy'); // 觸發跳動動畫
+                triggerAction('happy');
                 
                 if(currentStage !== "easy" && data.r) {
                     setTimeout(() => {
@@ -355,15 +355,14 @@
                             eqItem.classList.add('active');
                             eqCount++;
                         }
-                        document.getElementById('chick-speech').innerText = `Unlocked: ${data.r}`;
                     }, 500);
                 }
             } else {
                 btn.classList.add('wrong');
                 buttons[data.c].classList.add('correct');
                 document.getElementById('chick-speech').innerText = funnyLines[Math.floor(Math.random()*funnyLines.length)];
-                speak("Oops! Wrong way.");
-                triggerAction('shake'); // 觸發抖動動畫
+                speak("Oops!");
+                triggerAction('shake');
             }
 
             document.getElementById('score-val').innerText = score;
@@ -373,10 +372,8 @@
             setTimeout(() => {
                 if(currentIdx >= 10) {
                     if(currentStage === "easy") {
-                        speak("Easy stage clear!");
                         currentStage = "medium"; currentIdx = 0; loadQuestion();
                     } else if(currentStage === "medium") {
-                        speak("Medium stage clear!");
                         currentStage = "hard"; currentIdx = 0; loadQuestion();
                     } else {
                         finishGame();
@@ -384,14 +381,14 @@
                 } else {
                     loadQuestion();
                 }
-            }, 3500);
+            }, 3000);
         }
 
         function finishGame() {
             document.getElementById('progress-bar').style.width = '100%';
             document.getElementById('ceremony').style.display = 'flex';
-            document.getElementById('ceremony-text').innerText = `Legendary Survivor!\nFinal Score: ${score} points.\nYou've collected all the gear!`;
-            speak("Congratulations! You are a legendary survivor!");
+            document.getElementById('ceremony-text').innerText = `Legendary Survivor!\nFinal Score: ${score} points.`;
+            speak("Congratulations!");
         }
 
         document.addEventListener('DOMContentLoaded', init3D);
