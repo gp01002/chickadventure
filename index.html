@@ -14,6 +14,7 @@
             --gold: #ffd700;
         }
 
+        /* 根據你上傳的檔案名稱進行背景對應 */
         body.easy { --scene-bg: #e8f5e9; --scene-accent: #2e7d32; background-image: url('bg_easy.jpg'); }
         body.medium { --scene-bg: #fff3e0; --scene-accent: #e65100; background-image: url('bg_medium.jpg'); }
         body.hard { --scene-bg: #37474f; --scene-accent: #ff5252; --text-color: #fff; background-image: url('bg_hard.jpg'); }
@@ -25,21 +26,22 @@
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 100vh; margin: 0; color: var(--text-color); overflow-x: hidden; position: relative;
-            /* 背景圖層級與呈現設定 */
+            /* 背景圖滿版呈現 */
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-blend-mode: multiply; /* 混合模式讓背景色與圖片結合 */
+            /* 讓半透明色與圖片結合，確保文字好讀 */
+            background-blend-mode: soft-light;
         }
 
         #top-info {
             position: fixed; top: 20px; width: 90%; max-width: 500px;
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(8px);
             padding: 12px 25px; border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 10; color: #333;
         }
 
         /* 3D 畫布容器 */
@@ -47,28 +49,29 @@
             width: 280px; height: 280px;
             margin-bottom: 5px; z-index: 5;
             position: relative;
-            /* 輕微投影讓角色浮現 */
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.3));
         }
 
         #chick-speech { 
             margin-top: 5px; padding: 12px 20px; 
-            background: rgba(255, 255, 255, 0.9); 
+            background: rgba(255, 255, 255, 0.95); 
             backdrop-filter: blur(4px);
             border-radius: 15px; 
             font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
             position: relative; color: #333; max-width: 350px; 
             text-align: center; font-size: 15px; min-height: 50px;
             display: flex; align-items: center; justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.5);
         }
 
         #game-box {
-            background: rgba(255, 255, 255, 0.9); 
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.92); 
+            backdrop-filter: blur(12px);
             padding: 25px; border-radius: 28px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
             text-align: center; width: 95%; max-width: 520px; 
             z-index: 5; color: #333; margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .stage-badge { display: inline-block; padding: 4px 15px; border-radius: 20px; background: #eee; font-size: 13px; margin-bottom: 10px; font-weight: 800; color: var(--scene-accent); }
@@ -83,28 +86,28 @@
             display: flex; align-items: center; justify-content: center;
         }
         button:hover:not(:disabled) { border-color: var(--scene-accent); background: #fdfdfd; transform: scale(1.02); }
-        button.correct { background: #81c784 !important; color: white !border-color: #81c784; }
-        button.wrong { background: #e57373 !important; color: white !border-color: #e57373; }
+        button.correct { background: #81c784 !important; color: white; border-color: #81c784; }
+        button.wrong { background: #e57373 !important; color: white; border-color: #e57373; }
 
         #equipment-slots {
             position: absolute; width: 100%; height: 100%;
             top: 0; left: 0; pointer-events: none;
         }
         .eq-item { 
-            position: absolute; font-size: 36px; opacity: 0; 
+            position: absolute; font-size: 40px; opacity: 0; 
             transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            transform: scale(0); filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+            transform: scale(0); filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
         }
         .eq-item.active { opacity: 1; transform: scale(1); }
         
         /* 裝備位置優化 */
-        .eq-0 { top: 10%; left: 5%; }   .eq-1 { top: 0%; left: 40%; }  .eq-2 { top: 10%; right: 5%; }
-        .eq-3 { top: 45%; left: -10%; } .eq-4 { top: 45%; right: -10%; } .eq-5 { bottom: 20%; left: 0%; }
-        .eq-6 { bottom: 5%; left: 40%; } .eq-7 { bottom: 20%; right: 0%; }
-        .eq-8 { top: 25%; left: 15%; }  .eq-9 { top: 25%; right: 15%; }
+        .eq-0 { top: 5%; left: 0%; }    .eq-1 { top: -5%; left: 40%; }  .eq-2 { top: 5%; right: 0%; }
+        .eq-3 { top: 40%; left: -15%; } .eq-4 { top: 40%; right: -15%; } .eq-5 { bottom: 15%; left: -5%; }
+        .eq-6 { bottom: 0%; left: 40%; } .eq-7 { bottom: 15%; right: -5%; }
+        .eq-8 { top: 20%; left: 10%; }   .eq-9 { top: 20%; right: 10%; }
 
         #ceremony {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.96);
             display: none; flex-direction: column; align-items: center; justify-content: center;
             color: white; z-index: 100; text-align: center;
         }
@@ -162,8 +165,8 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
 
-            // 強力光源確保小雞在不同背景下都清晰
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            // 光源
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.8);
             dirLight.position.set(5, 10, 7.5);
             scene.add(dirLight);
             
@@ -173,7 +176,7 @@
             // 小雞角色模型
             chickGroup = new THREE.Group();
             
-            // 身體 (Sphere)
+            // 身體
             const bodyGeo = new THREE.SphereGeometry(1, 32, 32);
             const bodyMat = new THREE.MeshToonMaterial({ color: 0xffec85 });
             const body = new THREE.Mesh(bodyGeo, bodyMat);
@@ -189,7 +192,7 @@
             eyeR.position.set(-0.35, 0.4, 0.85);
             chickGroup.add(eyeL, eyeR);
 
-            // 嘴巴 (Cone)
+            // 嘴巴
             const beakGeo = new THREE.ConeGeometry(0.2, 0.45, 16);
             const beakMat = new THREE.MeshToonMaterial({ color: 0xff9d42 });
             const beak = new THREE.Mesh(beakGeo, beakMat);
@@ -207,7 +210,7 @@
         function animate() {
             requestAnimationFrame(animate);
             if (chickGroup) {
-                chickGroup.rotation.y += 0.015; // 持續慢速旋轉
+                chickGroup.rotation.y += 0.015;
             }
             renderer.render(scene, camera);
         }
